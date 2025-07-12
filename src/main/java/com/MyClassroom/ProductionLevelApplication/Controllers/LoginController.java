@@ -19,7 +19,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/login")
-@CrossOrigin(origins = "http://localhost:3000")
+//@CrossOrigin(origins = {"http://localhost:3000", "https://your-frontend-url.vercel.app"})
 public class LoginController {
 
     @Autowired

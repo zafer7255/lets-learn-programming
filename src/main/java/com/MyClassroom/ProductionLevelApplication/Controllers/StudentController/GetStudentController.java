@@ -19,7 +19,7 @@ import java.nio.file.Paths;
 import java.security.Principal;
 
 @RestController
-@CrossOrigin(origins = {"http://localhost:3000", "https://your-frontend-url.vercel.app"})
+//@CrossOrigin(origins = {"http://localhost:3000", "https://your-frontend-url.vercel.app"})
 @RequestMapping("/student")
 public class GetStudentController {
 

@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = {"http://localhost:3000", "https://your-frontend-url.vercel.app"})
+//@CrossOrigin(origins = {"http://localhost:3000", "https://your-frontend-url.vercel.app"})
 @RequestMapping("/teacher")
 public class GetTeacherController {
 
