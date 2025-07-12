@@ -14,7 +14,7 @@ public class UserEmailService {
     public void sendVerificationMail(String to, String token) {
 
         String subject = "Welcome to MyClassroom – Verify Your Email to Get Started!";
-        String verificationLink = "http://localhost:8080/user/verify?token=" + token;
+        String verificationLink = "https://lets-learn-programming-production.up.railway.app/user/verify?token=" + token;
         String body = "Hi there,\n\n" +
                 "Thank you for registering with MyClassroom!\n\n" +
                 "To activate your account and start exploring, please verify your email by clicking the link below:\n\n" +
