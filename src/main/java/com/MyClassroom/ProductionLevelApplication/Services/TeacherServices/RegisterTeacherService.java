@@ -38,12 +38,22 @@ public class RegisterTeacherService {
     public String RegisterTeacher(Teacher teacher) {
 
         for (User user : userRepo.findAll()) {
-            if (user.getEmail().equals(teacher.getEmail()) && user.getRole() != teacher.getRole())
+
+            if (user.getEmail().equals(teacher.getEmail()) && user.getRole() != role)
             {
-                return "Email Already Exist With " + user.getRole() + " Role";
+                if (user.isVerified()) {
+                    return "Email Already Exist With " + user.getRole() + " Role";
+                }
+                else {
+                    return "Email Already Exist With " + user.getRole() + " Role but it is not verified soo register again with " + user.getRole() + "Role";
+                }
             }
-           else if(user.getEmail().equals(teacher.getEmail()) && user.getRole().equals(teacher.getRole())){
-                return "Email Already Exist Try New One";
+           else if(user.getEmail().equals(teacher.getEmail()) && user.getRole().equals(role)){
+               if (user.isVerified()){
+                   return "Email Already Exist Try New One";
+               } else {
+                   break;
+               }
             }
         }
 
@@ -59,7 +69,6 @@ public class RegisterTeacherService {
             }
             teacherRepo.save(teacher);
 
-            //Email Services Start here
 
             String token = UUID.randomUUID().toString();
             VerificationToken verificationToken = new VerificationToken();

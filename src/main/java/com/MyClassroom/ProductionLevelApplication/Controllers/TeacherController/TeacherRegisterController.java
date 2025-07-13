@@ -17,6 +17,7 @@ public class TeacherRegisterController {
 
     @PostMapping("/teacher")
     public ResponseEntity<?> registerTeacher(@RequestBody Teacher teacher) {
+        System.out.println("Hello");
         String result = registerTeacherService.RegisterTeacher(teacher);
         if (result.equals("We Send verification link to your email verify it") || result.equals("Verified")) {
             return new ResponseEntity<>(result, HttpStatus.OK);

@@ -37,10 +37,19 @@ public class RegisterStudentServices {
         for (User user : userRepo.findAll()){
             if (user.getEmail().equals(student.getEmail()) && user.getRole() != student.getRole())
             {
-                return "Email Already Exist With " + user.getRole() + " Role";
+                if(user.isVerified()){
+                    return "Email Already Exist With " + user.getRole() + " Role";
+                } else {
+                    return "Email Already Exist With " + user.getRole() + " Role but it is not verified soo register again with " + user.getRole() + "Role";
+                }
             }
             else if(user.getEmail().equals(student.getEmail()) && user.getRole().equals(student.getRole())) {
-                return "Email Already Exist Try New One";
+
+                if (user.isVerified()){
+                    return "Email Already Exist Try New One";
+                } else {
+                     break;
+                }
             }
         }
 
