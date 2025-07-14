@@ -34,13 +34,15 @@ public class RegisterStudentServices {
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     public String RegisterStudent(Student student) {
+
         for (User user : userRepo.findAll()){
-            if (user.getEmail().equals(student.getEmail()) && user.getRole() != student.getRole())
+
+            if (user.getEmail().equals(student.getEmail()) && !user.getRole().equals(student.getRole()))
             {
                 if(user.isVerified()){
                     return "Email Already Exist With " + user.getRole() + " Role";
                 } else {
-                    return "Email Already Exist With " + user.getRole() + " Role but it is not verified soo register again with " + user.getRole() + "Role";
+                    return "Email Already Exist With " + user.getRole() + " Role but it is not verified soo register again with " + user.getRole() + " Role";
                 }
             }
             else if(user.getEmail().equals(student.getEmail()) && user.getRole().equals(student.getRole())) {
