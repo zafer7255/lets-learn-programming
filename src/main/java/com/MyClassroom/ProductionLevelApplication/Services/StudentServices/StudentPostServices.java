@@ -46,7 +46,7 @@ public class StudentPostServices {
 
             completed_assignmentsRepo.save(completedAssignments);
 
-            return "Assignment uploaded successfully to Cloudinary";
+            return "Assignment uploaded successfully";
 
         } catch (Exception e) {
             System.out.println(e);

@@ -31,7 +31,7 @@ public class PostStudentController {
             return new ResponseEntity<>("It's a demo account you can't upload anything ", HttpStatus.OK);
         }
         String result = studentPostServices.uploadCompletedAssignment(assignmentId,studentEmail,studentName,title,file);
-        if(result.equals("Assignment Upload Successfully")) {
+        if(result.equals("Assignment uploaded successfully")) {
             return new ResponseEntity<>(result, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(result,HttpStatus.NOT_FOUND);

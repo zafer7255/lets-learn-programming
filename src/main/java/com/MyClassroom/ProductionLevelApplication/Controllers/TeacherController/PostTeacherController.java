@@ -58,7 +58,7 @@ public class PostTeacherController {
         }
 
         String result = teacherPostServices.uploadClass(title, description, video, uploadedBy);
-        if (result.equals("Video Upload Successfully")) {
+        if (result.equals("Video uploaded successfully")) {
             return new ResponseEntity<>(result,HttpStatus.OK);
         } else {
             return new ResponseEntity<>(result,HttpStatus.NOT_FOUND);

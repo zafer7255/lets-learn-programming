@@ -62,7 +62,7 @@ public class TeacherPostServices {
             assignments.setUploadedBy(uploadedBy);
 
             assignmentsRepo.save(assignments);
-            return "Assignment uploaded successfully to Cloudinary";
+            return "Assignment uploaded successfully";
         } catch (Exception e) {
             e.printStackTrace();
             return "Upload failed";
@@ -90,7 +90,7 @@ public class TeacherPostServices {
 
             classRecordingRepo.save(classRecording);
 
-            return "Video uploaded successfully to Cloudinary";
+            return "Video uploaded successfully";
 
         } catch (Exception e) {
             e.printStackTrace();
