@@ -11,7 +11,7 @@ import java.security.Principal;
 
 @RestController
 @RequestMapping("/student")
-//@CrossOrigin(origins = {"http://localhost:3000", "https://your-frontend-url.vercel.app"})
+@CrossOrigin(origins = {"http://localhost:3000", "https://your-frontend-url.vercel.app"})
 public class PostStudentController {
 
     @Autowired
