@@ -6,6 +6,8 @@ import com.MyClassroom.ProductionLevelApplication.Models.Teacher;
 import com.MyClassroom.ProductionLevelApplication.RepoDAO.AssignmentsRepo;
 import com.MyClassroom.ProductionLevelApplication.RepoDAO.ClassRecordingRepo;
 import com.MyClassroom.ProductionLevelApplication.RepoDAO.TeacherRepo;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -22,6 +25,8 @@ public class TeacherPostServices {
     TeacherRepo teacherRepo;
     @Autowired
     AssignmentsRepo assignmentsRepo;
+    @Autowired
+    Cloudinary cloudinary;
 
     @Autowired
     ClassRecordingRepo classRecordingRepo;
@@ -40,23 +45,24 @@ public class TeacherPostServices {
 
     public String upload_Assignments(String title, String description, MultipartFile file, String uploadedBy) {
         try {
-            String uploadDir = "/home/zafer/MY_CLASS_ROOM/ProductionLevelApplication/src/main/java/com/MyClassroom/ProductionLevelApplication/UploadAssignments/";
-            String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
-            Path filePath = Paths.get(uploadDir + fileName);
-            Files.createDirectories(filePath.getParent());
-            Files.write(filePath, file.getBytes());
+            // Upload the file to Cloudinary (can be PDF, DOCX, etc.)
+            Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
+                    "resource_type", "raw",
+                    "folder", "teacher/class-assignments"// 'raw' is used for non-image/video files like PDF
+            ));
 
-            // Correct file URL to save in DB
-            String fileUrl = fileName;
+            // Get the file URL
+            String fileUrl = uploadResult.get("secure_url").toString();
 
+            // Save file details in DB
             Assignments assignments = new Assignments();
             assignments.setTitle(title);
             assignments.setDescription(description);
-            assignments.setFileUrl(fileUrl);
+            assignments.setFileUrl(fileUrl);  // now cloud URL
             assignments.setUploadedBy(uploadedBy);
 
             assignmentsRepo.save(assignments);
-            return "Assignment uploaded successfully";
+            return "Assignment uploaded successfully to Cloudinary";
         } catch (Exception e) {
             e.printStackTrace();
             return "Upload failed";
@@ -66,28 +72,29 @@ public class TeacherPostServices {
     public String uploadClass(String title, String description, MultipartFile video, String uploadedBy) {
 
         try {
-            String uploadDir = "/home/zafer/MY_CLASS_ROOM/ProductionLevelApplication/src/main/java/com/MyClassroom/ProductionLevelApplication/UploadRecordingVideos/";
-            String fileName = UUID.randomUUID() + "-" + video.getOriginalFilename();
-            Path filePath = Paths.get(uploadDir + fileName);
-            Files.createDirectories(filePath.getParent());
-            Files.write(filePath, video.getBytes());
+            // Upload to Cloudinary
+            Map uploadResult = cloudinary.uploader().upload(video.getBytes(), ObjectUtils.asMap(
+                    "resource_type", "video",
+                    "folder", "teacher/class-recordings"
+            ));
 
-            String videoUrl = fileName;
+            // Get the video URL
+            String videoUrl = uploadResult.get("secure_url").toString();
+
+            // Save in your database
             ClassRecording classRecording = new ClassRecording();
             classRecording.setTitle(title);
             classRecording.setDescription(description);
-            classRecording.setVideoUrl(videoUrl);
+            classRecording.setVideoUrl(videoUrl);  // now cloud URL
             classRecording.setUploadedBy(uploadedBy);
 
             classRecordingRepo.save(classRecording);
 
-            return "Video Upload Successfully";
+            return "Video uploaded successfully to Cloudinary";
 
         } catch (Exception e) {
-
-            System.out.println(e);
-            return "Video Upload failed";
-
+            e.printStackTrace();
+            return "Video upload failed";
         }
 
     }
