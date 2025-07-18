@@ -5,13 +5,17 @@ import com.MyClassroom.ProductionLevelApplication.Models.Completed_Assignments;
 import com.MyClassroom.ProductionLevelApplication.Models.Teacher;
 import com.MyClassroom.ProductionLevelApplication.Models.Student;
 import com.MyClassroom.ProductionLevelApplication.Services.TeacherServices.TeacherGetServices;
+import com.cloudinary.Cloudinary;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.core.io.Resource;
+import org.springframework.web.client.RestTemplate;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,6 +30,8 @@ public class GetTeacherController {
 
     @Autowired
     TeacherGetServices teacherGetServices;
+    @Autowired
+    Cloudinary cloudinary;
 
     @GetMapping("/detail")
     public ResponseEntity<?> GetTeacherDetail(@RequestParam String email , Principal principal) {
@@ -95,18 +101,31 @@ public class GetTeacherController {
         }
 
         try {
-            Path filePath = Paths.get("/home/zafer/MY_CLASS_ROOM/ProductionLevelApplication/src/main/java/com/MyClassroom/ProductionLevelApplication/UploadCompletedAssignment/")
-                    .resolve(filename)
-                    .normalize();
-            UrlResource resource = new UrlResource(filePath.toUri());
+            // Construct Cloudinary public ID with folder
+            String publicId = "student/completed-assignments/" + filename;
 
-            if (!resource.exists()) {
+            // Generate Cloudinary URL for the raw file
+            String fileUrl = cloudinary.url()
+                    .resourceType("raw")
+                    .generate(publicId);
+
+            // Use RestTemplate to download the file bytes from Cloudinary
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<byte[]> response = restTemplate.getForEntity(fileUrl, byte[].class);
+
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                byte[] fileBytes = response.getBody();
+
+                ByteArrayResource resource = new ByteArrayResource(fileBytes);
+
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                        .contentLength(fileBytes.length)
+                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                        .body(resource);
+            } else {
                 return ResponseEntity.notFound().build();
             }
-
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-                    .body(resource);
 
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();

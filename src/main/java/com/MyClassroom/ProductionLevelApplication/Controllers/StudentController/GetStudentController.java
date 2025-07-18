@@ -6,13 +6,17 @@ import com.MyClassroom.ProductionLevelApplication.Models.Student;
 import com.MyClassroom.ProductionLevelApplication.RepoDAO.AssignmentsRepo;
 import com.MyClassroom.ProductionLevelApplication.RepoDAO.ClassRecordingRepo;
 import com.MyClassroom.ProductionLevelApplication.Services.StudentServices.StudentGetServices;
+import com.cloudinary.Cloudinary;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,6 +33,8 @@ public class GetStudentController {
     AssignmentsRepo assignmentsRepo;
     @Autowired
     ClassRecordingRepo classRecordingRepo;
+    @Autowired
+    Cloudinary cloudinary;
 
     @GetMapping("/details/{email}")
     public ResponseEntity<?> GetStudentDetail(@PathVariable String email , Principal principal)
@@ -67,28 +73,39 @@ public class GetStudentController {
     }
 
     @GetMapping("download-assignment/{filename:.+}")
-    public ResponseEntity<Resource> downloadAssignments(@PathVariable String filename , Principal principal)
-    {
-        if (principal.getName().equals("student@demo.com")){
+    public ResponseEntity<Resource> downloadAssignments(@PathVariable String filename, Principal principal) {
+        if (principal.getName().equals("student@demo.com")) {
             return ResponseEntity.badRequest().build();
         }
-        try
-        {
-            Path filePath = Paths.get("/home/zafer/MY_CLASS_ROOM/ProductionLevelApplication/src/main/java/com/MyClassroom/ProductionLevelApplication/UploadAssignments/")
-                    .resolve(filename)
-                    .normalize();
-            UrlResource resource = new UrlResource(filePath.toUri());
 
-            if (!resource.exists()) {
+        try {
+            // Construct Cloudinary public ID with folder
+            String publicId = "teacher/class-assignments/" + filename;
+
+            // Generate Cloudinary URL for the raw file
+            String fileUrl = cloudinary.url()
+                    .resourceType("raw")
+                    .generate(publicId);
+
+            // Use RestTemplate to download the file bytes from Cloudinary
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<byte[]> response = restTemplate.getForEntity(fileUrl, byte[].class);
+
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                byte[] fileBytes = response.getBody();
+
+                ByteArrayResource resource = new ByteArrayResource(fileBytes);
+
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                        .contentLength(fileBytes.length)
+                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                        .body(resource);
+            } else {
                 return ResponseEntity.notFound().build();
             }
-
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-                    .body(resource);
-
-
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
     }
@@ -110,20 +127,25 @@ public class GetStudentController {
         }
         try
         {
-            Path filePath = Paths.get("/home/zafer/MY_CLASS_ROOM/ProductionLevelApplication/src/main/java/com/MyClassroom/ProductionLevelApplication/UploadRecordingVideos/")
-                    .resolve(filename)
-                    .normalize();
-            UrlResource resource = new UrlResource(filePath.toUri());
+            String publicId = "teacher/class-recordings/" + filename;
 
-            if (!resource.exists()) {
+            String fileUrl = cloudinary.url()
+                    .resourceType("video")
+                    .generate(publicId);
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<byte[]> response = restTemplate.getForEntity(fileUrl, byte[].class);
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null)
+            {
+                byte[] fileBytes = response.getBody();
+                ByteArrayResource resource = new ByteArrayResource(fileBytes);
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                        .contentLength(fileBytes.length)
+                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                        .body(resource);
+            } else {
                 return ResponseEntity.notFound().build();
             }
-
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-                    .body(resource);
-
-
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
