@@ -17,8 +17,8 @@ public class ClassRecording {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
 
+    private int id;
     private String title;
     private String description;
     private String videoUrl;

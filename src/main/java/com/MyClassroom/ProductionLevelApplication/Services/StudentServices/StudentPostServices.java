@@ -29,7 +29,8 @@ public class StudentPostServices {
             // Cloud folder path like: teacher/completedassignment/studentEmail/
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
                     "resource_type", "raw",
-                    "folder", "student/completed-assignments"// 'raw' is used for non-image/video files like PDF
+                    "folder", "student/completed-assignments",
+                    "public_id", "student/completed-assignments/" + title// 'raw' is used for non-image/video files like PDF
             ));
 
             String fileUrl = uploadResult.get("secure_url").toString();

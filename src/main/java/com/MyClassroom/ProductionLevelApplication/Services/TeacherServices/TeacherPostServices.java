@@ -48,7 +48,8 @@ public class TeacherPostServices {
             // Upload the file to Cloudinary (can be PDF, DOCX, etc.)
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
                     "resource_type", "raw",
-                    "folder", "teacher/class-assignments"// 'raw' is used for non-image/video files like PDF
+                    "folder", "teacher/class-assignments",
+                    "public_id", "teacher/class-assignments/" + title// 'raw' is used for non-image/video files like PDF
             ));
 
 
@@ -76,7 +77,8 @@ public class TeacherPostServices {
             // Upload to Cloudinary
             Map uploadResult = cloudinary.uploader().upload(video.getBytes(), ObjectUtils.asMap(
                     "resource_type", "video",
-                    "folder", "teacher/class-recordings"
+                    "folder", "teacher/class-recordings",
+                    "public_id", "teacher/class-recordings/" + title
             ));
 
             // Get the video URL
